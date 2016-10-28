@@ -103,6 +103,10 @@ If you want to run an existing graph, you can use the `--graph` option.
 
     noflo-nodejs --graph graphs/MyMainGraph.json
 
+If you want the graph to be saved, you can use the `--save-graph` option.
+
+    noflo-nodejs --save-graph graphs/MyNewGraph.json
+
 If you want the process to exit when the network stops, you can pass `--batch`.
 
 ## Debugging
