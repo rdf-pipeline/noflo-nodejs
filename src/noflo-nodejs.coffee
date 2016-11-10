@@ -7,6 +7,7 @@ trace = require('noflo-runtime-base').trace
 runtime = require 'noflo-runtime-websocket'
 flowhub = require 'flowhub-registry'
 querystring = require 'querystring'
+finalhandler = require 'finalhandler'
 path = require 'path'
 
 program = (require 'yargs')
@@ -126,7 +127,19 @@ addDebug = (network, verbose, logSubgraph) ->
     console.log "#{identifier(data)} #{clc.yellow('DISC')}"
 
 startServer = (program, defaultGraph) ->
-  server = http.createServer ->
+  address = 'ws://' + stored.host + ':' + stored.port
+  params = 'protocol=websocket&address=' + address
+  params += '&secret=' + stored.secret if stored.secret
+  ide_url = stored.ide + '#runtime/endpoint?' + querystring.escape(params)
+
+  server = http.createServer (req, res) ->
+    done = finalhandler req, res
+    if req.url == '/'
+      res.statusCode = 302
+      res.setHeader 'Location', ide_url
+      res.end()
+    else
+      done();
 
   rt = runtime server,
     defaultGraph: defaultGraph
@@ -168,12 +181,9 @@ startServer = (program, defaultGraph) ->
           cleanup()
 
   server.listen stored.port, ->
-    address = 'ws://' + stored.host + ':' + stored.port
-    params = 'protocol=websocket&address=' + address
-    params += '&secret=' + stored.secret if stored.secret
     console.log 'NoFlo runtime listening at ' + address
     console.log 'Using ' + baseDir + ' for component loading'
-    console.log 'Live IDE URL: ' + stored.ide + '#runtime/endpoint?' + querystring.escape(params)
+    console.log 'Live IDE URL: ' + ide_url
     if flowhubRuntime
       # Register the runtime with Flowhub so that it will show up in the UI
       flowhubRuntime.register (err, ok) ->
