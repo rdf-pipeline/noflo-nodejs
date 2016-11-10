@@ -8,6 +8,8 @@ runtime = require 'noflo-runtime-websocket'
 flowhub = require 'flowhub-registry'
 querystring = require 'querystring'
 finalhandler = require 'finalhandler'
+serveStatic = require 'serve-static'
+navigator = require './navigator'
 path = require 'path'
 
 program = (require 'yargs')
@@ -127,6 +129,7 @@ addDebug = (network, verbose, logSubgraph) ->
     console.log "#{identifier(data)} #{clc.yellow('DISC')}"
 
 startServer = (program, defaultGraph) ->
+  serve = serveStatic path.join __dirname, '..'
   address = 'ws://' + stored.host + ':' + stored.port
   params = 'protocol=websocket&address=' + address
   params += '&secret=' + stored.secret if stored.secret
@@ -138,8 +141,10 @@ startServer = (program, defaultGraph) ->
       res.statusCode = 302
       res.setHeader 'Location', ide_url
       res.end()
-    else
-      done();
+    else if req.url.indexOf('/css/') == 0 or req.url.indexOf('/fonts/') == 0
+      serve req, res, done
+    else if req.url.indexOf('/node/') != 0
+      done()
 
   rt = runtime server,
     defaultGraph: defaultGraph
@@ -148,6 +153,8 @@ startServer = (program, defaultGraph) ->
     catchExceptions: program.catchExceptions
     permissions: stored.permissions
     cache: program.cache
+
+  navigator server, '/node/', rt
 
   tracer = new trace.Tracer {}
 
