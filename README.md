@@ -3,6 +3,17 @@ NoFlo Node.js runtime environment
 
 This tool is designed to be used together with the [Flowhub](http://flowhub.io/) development environment for running [NoFlo](http://noflojs.org/) networks on [Node.js](http://nodejs.org/).
 
+## Checkout noflo-nodejs
+
+To use a particular noflo-nodejs branch, do a git clone of the repository and checkout the desired branch. Then use npm link to register the version locally.
+
+```shell
+git clone ...noflo-nodejs
+git checkout master
+npm install
+npm link
+```
+
 ## Prepare a project folder
 
 Start by setting up a local NoFlo Node.js project. For example:
@@ -13,6 +24,8 @@ $ cd my-project
 $ npm init
 $ npm install noflo --save
 $ npm install noflo-nodejs --save
+# If you are using a custom noflo-nodejs branch:
+$ npm link noflo-nodejs
 ```
 
 Continue by installing whatever [NoFlo component libraries](http://noflojs.org/library/) you need, for example:
@@ -89,6 +102,10 @@ but you can change this by setting the `PROJECT_HOME` environment variable.
 If you want to run an existing graph, you can use the `--graph` option.
 
     noflo-nodejs --graph graphs/MyMainGraph.json
+
+If you want the graph to be saved, you can use the `--save-graph` option.
+
+    noflo-nodejs --save-graph graphs/MyNewGraph.json
 
 If you want the process to exit when the network stops, you can pass `--batch`.
 
