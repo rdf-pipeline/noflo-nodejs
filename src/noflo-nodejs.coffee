@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 clc = require 'cli-color'
 http = require 'http'
+fs = require 'fs'
 lib = require '../index'
 noflo = require 'noflo'
 trace = require('noflo-runtime-base').trace
@@ -16,6 +17,8 @@ program = (require 'yargs')
   .options(
     graph:
       description: 'Path to a graph file to start'
+    'save-graph':
+      description: 'Path to write the final graph to'
     'capture-output':
       default: false
       description: 'Catch writes to stdout and send to the FBP protocol client'
@@ -162,6 +165,10 @@ startServer = (program, defaultGraph) ->
     return console.log 'ERROR: Tracing not enabled' if not program.trace
     tracer.dumpFile null, (err, fname) ->
       console.log 'Wrote flowtrace to:', fname
+
+  if program['save-graph']
+    defaultGraph.on 'endTransaction', (id, metadata) ->
+      fs.writeFileSync program['save-graph'], JSON.stringify(defaultGraph, null, 2)
 
   rt.network.on 'addnetwork', (network) ->
     tracer.attach network if program.trace
